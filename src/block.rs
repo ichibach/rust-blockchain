@@ -3,13 +3,13 @@ use std::{time::SystemTime};
 
 use crypto::{digest::Digest, sha2::Sha256};
 use log::info;
+use serde::{Deserialize, Serialize};
 
 use crate::utils::Result;
 use crate::r#const::TARGET_HEXT;
 
 
-#[derive(Debug, Clone)]
-
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Block {
   timestamp: u128,
   transactions: String,
@@ -48,6 +48,10 @@ impl Block {
 
   pub fn get_hash (&self) -> String {
     self.hash.clone()
+  }
+
+  pub fn get_prev_hash (&self) -> String {
+    self.prev_block_hash.clone()
   }
 
   fn run_proof_of_work(&mut self) -> Result<()> {
