@@ -5,14 +5,15 @@ use crypto::{digest::Digest, sha2::Sha256};
 use log::info;
 use serde::{Deserialize, Serialize};
 
-use crate::utils::Result;
+use crate::error::Result;
 use crate::r#const::TARGET_HEXT;
+use crate::transaction::Transaction;
 
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Block {
   timestamp: u128,
-  transactions: String,
+  transactions: Vec<Transaction>,
   prev_block_hash: String,
   hash: String,
   height: usize,
@@ -22,7 +23,7 @@ pub struct Block {
 
 
 impl Block {
-  pub fn new_block(data: String, prev_block_hash: String, height: usize) -> Result<Block> {
+  pub fn new_block(data: Vec<Transaction>, prev_block_hash: String, height: usize) -> Result<Block> {
     
     let timestamp = SystemTime::now()
       .duration_since(SystemTime::UNIX_EPOCH)?
@@ -42,8 +43,8 @@ impl Block {
     Ok(block)
   }
   
-  pub fn new_genesis_block () -> Block {
-    Block::new_block(String::from("Genesis Block"), String::new(), 0).unwrap()
+  pub fn new_genesis_block (coinbase: Transaction) -> Block {
+    Block::new_block(vec![coinbase], "0".repeat(64), 0).unwrap()
   }
 
   pub fn get_hash (&self) -> String {
@@ -52,6 +53,10 @@ impl Block {
 
   pub fn get_prev_hash (&self) -> String {
     self.prev_block_hash.clone()
+  }
+
+  pub fn get_transactions (&self) -> &Vec<Transaction> {
+    &self.transactions
   }
 
   fn run_proof_of_work(&mut self) -> Result<()> {
